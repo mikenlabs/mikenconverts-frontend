@@ -1,0 +1,131 @@
+:root {
+  --bg: #f4f6fb;
+  --card: #ffffff;
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --error: #dc2626;
+  --success: #16a34a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+}
+
+.container {
+  width: 100%;
+  max-width: 480px;
+}
+
+h1 {
+  text-align: center;
+  margin: 0 0 1.5rem;
+  font-size: 1.75rem;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+label {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+}
+
+input,
+select {
+  padding: 0.7rem 0.8rem;
+  font-size: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--text);
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.swap-btn {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: var(--muted);
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: background 0.15s, color 0.15s;
+}
+
+.swap-btn:hover {
+  background: #eef2ff;
+  color: var(--primary);
+}
+
+.convert-btn {
+  width: 100%;
+  padding: 0.85rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--primary);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.convert-btn:hover {
+  background: var(--primary-dark);
+}
+
+.result {
+  margin-top: 1.25rem;
+  font-size: 1.15rem;
+  text-align: center;
+  color: var(--success);
+  font-weight: 600;
+  min-height: 1.5rem;
+}
+
+.error {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  text-align: center;
+  color: var(--error);
+  min-height: 1.2rem;
+}
