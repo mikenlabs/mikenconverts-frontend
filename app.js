@@ -1,8 +1,38 @@
 const CURRENCIES = [
-  "USD", "EUR", "GBP", "JPY", "AUD", "CAD", "CHF", "CNY", "INR", "NZD",
-  "SEK", "MXN", "SGD", "HKD", "NOK", "DKK", "ZAR", "TRY", "RUB", "BRL",
-  "KRW", "PLN", "CZK", "HUF", "ILS", "THB", "IDR", "MYR", "PHP", "RON"
+  { code: "USD", symbol: "$" },
+  { code: "EUR", symbol: "€" },
+  { code: "GBP", symbol: "£" },
+  { code: "JPY", symbol: "¥" },
+  { code: "AUD", symbol: "A$" },
+  { code: "CAD", symbol: "C$" },
+  { code: "CHF", symbol: "CHF" },
+  { code: "CNY", symbol: "¥" },
+  { code: "INR", symbol: "₹" },
+  { code: "NGN", symbol: "₦" },
+  { code: "NZD", symbol: "NZ$" },
+  { code: "SEK", symbol: "kr" },
+  { code: "MXN", symbol: "MX$" },
+  { code: "SGD", symbol: "S$" },
+  { code: "HKD", symbol: "HK$" },
+  { code: "NOK", symbol: "kr" },
+  { code: "DKK", symbol: "kr" },
+  { code: "ZAR", symbol: "R" },
+  { code: "TRY", symbol: "₺" },
+  { code: "RUB", symbol: "₽" },
+  { code: "BRL", symbol: "R$" },
+  { code: "KRW", symbol: "₩" },
+  { code: "PLN", symbol: "zł" },
+  { code: "CZK", symbol: "Kč" },
+  { code: "HUF", symbol: "Ft" },
+  { code: "ILS", symbol: "₪" },
+  { code: "THB", symbol: "฿" },
+  { code: "IDR", symbol: "Rp" },
+  { code: "MYR", symbol: "RM" },
+  { code: "PHP", symbol: "₱" },
+  { code: "RON", symbol: "lei" }
 ];
+
+const SYMBOLS = Object.fromEntries(CURRENCIES.map(c => [c.code, c.symbol]));
 
 const API_BASE = (window.__API_BASE__ || "http://localhost:3000").replace(/\/$/, "");
 
@@ -13,22 +43,29 @@ const swapBtn = document.getElementById("swap");
 const convertBtn = document.getElementById("convert");
 const resultEl = document.getElementById("result");
 const errorEl = document.getElementById("error");
-const rateHint = document.getElementById("rate-hint");
+const fromSymbol = document.getElementById("from-symbol");
 
 let isConverting = false;
 
 function populateSelects() {
-  const fragment = document.createDocumentFragment();
-  CURRENCIES.forEach((code) => {
+  CURRENCIES.forEach(({ code, symbol }) => {
     const opt1 = document.createElement("option");
     opt1.value = code;
-    opt1.textContent = code;
-    fragment.appendChild(opt1);
+    opt1.textContent = `${code} ${symbol}`;
+    fromSelect.appendChild(opt1);
+
+    const opt2 = document.createElement("option");
+    opt2.value = code;
+    opt2.textContent = `${code} ${symbol}`;
+    toSelect.appendChild(opt2);
   });
-  fromSelect.appendChild(fragment.cloneNode(true));
-  toSelect.appendChild(fragment);
   fromSelect.value = "USD";
-  toSelect.value = "EUR";
+  toSelect.value = "NGN";
+  updateFromSymbol();
+}
+
+function updateFromSymbol() {
+  fromSymbol.textContent = SYMBOLS[fromSelect.value] || "";
 }
 
 function setLoading(loading) {
@@ -38,17 +75,11 @@ function setLoading(loading) {
   fromSelect.disabled = loading;
   toSelect.disabled = loading;
   swapBtn.disabled = loading;
-
-  if (loading) {
-    convertBtn.querySelector(".btn-label").textContent = "Converting…";
-  } else {
-    convertBtn.querySelector(".btn-label").textContent = "Convert";
-  }
+  convertBtn.querySelector("span").textContent = loading ? "Converting…" : "Convert";
 }
 
 function showError(msg) {
   errorEl.textContent = msg;
-  resultEl.textContent = "";
   errorEl.style.display = "flex";
   resultEl.style.display = "none";
 }
@@ -62,29 +93,6 @@ function showResult(text) {
   resultEl.textContent = text;
   resultEl.style.display = "flex";
   errorEl.style.display = "none";
-}
-
-function updateRateHint(rate) {
-  if (rate) {
-    const from = fromSelect.value;
-    const to = toSelect.value;
-    rateHint.textContent = `1 ${from} = ${rate.toFixed(4)} ${to}`;
-  } else {
-    rateHint.textContent = "—";
-  }
-}
-
-async function fetchRate(from, to) {
-  try {
-    const res = await fetch(
-      `${API_BASE}/api/convert?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&amount=1`
-    );
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data.rate;
-  } catch {
-    return null;
-  }
 }
 
 async function convert() {
@@ -113,8 +121,9 @@ async function convert() {
       return;
     }
 
-    showResult(`${Number(data.amount).toLocaleString()} ${data.from} = ${Number(data.converted).toLocaleString(undefined, { maximumFractionDigits: 6 })} ${data.to}`);
-    updateRateHint(data.rate);
+    const fromSym = SYMBOLS[from] || "";
+    const toSym = SYMBOLS[to] || "";
+    showResult(`${fromSym}${Number(data.amount).toLocaleString()} = ${toSym}${Number(data.converted).toLocaleString(undefined, { maximumFractionDigits: 4 })}`);
   } catch (err) {
     showError("Could not reach the conversion service. Check your connection.");
   } finally {
@@ -122,28 +131,21 @@ async function convert() {
   }
 }
 
-async function onCurrencyChange() {
-  const from = fromSelect.value;
-  const to = toSelect.value;
-  if (from !== to) {
-    const rate = await fetchRate(from, to);
-    updateRateHint(rate);
-  } else {
-    updateRateHint(null);
-  }
-}
-
 swapBtn.addEventListener("click", () => {
   const tmp = fromSelect.value;
   fromSelect.value = toSelect.value;
   toSelect.value = tmp;
-  onCurrencyChange();
+  updateFromSymbol();
 });
 
 convertBtn.addEventListener("click", convert);
 
-fromSelect.addEventListener("change", onCurrencyChange);
-toSelect.addEventListener("change", onCurrencyChange);
+document.getElementById("converter-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  convert();
+});
+
+fromSelect.addEventListener("change", updateFromSymbol);
 
 amountInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && !e.shiftKey) {
@@ -153,4 +155,3 @@ amountInput.addEventListener("keydown", (e) => {
 });
 
 populateSelects();
-onCurrencyChange();
